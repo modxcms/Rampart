@@ -64,8 +64,12 @@ Rampart.grid.Bans = function(config) {
     this.sm = new Ext.grid.CheckboxSelectionModel();
     Ext.applyIf(config,{
         url: Rampart.config.connector_url
-        ,baseParams: { action: 'mgr/ban/getList' }
-        ,save_action: 'mgr/ban/updateFromGrid'
+        ,baseParams: { action: Rampart.config.modx3 ?
+                'Rampart\\Processors\\Ban\\GetList'
+                : 'mgr/ban/getList' }
+        ,save_action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\Ban\\UpdateFromGrid'
+            : 'mgr/ban/updateFromGrid'
         ,fields: ['id','name','reason','ip','hostname','email','username','expireson','matches','active','notes']
         ,paging: true
         ,autosave: true
@@ -229,7 +233,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/ban/duplicate'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Duplicate'
+                    : 'mgr/ban/duplicate'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -243,7 +249,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
             ,text: _('rampart.ban_remove_confirm')
             ,url: this.config.url
             ,params: {
-                action: 'mgr/ban/remove'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Remove'
+                    : 'mgr/ban/remove'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -260,7 +268,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
             ,text: _('rampart.ban_remove_selected_confirm')
             ,url: this.config.url
             ,params: {
-                action: 'mgr/ban/removeMultiple'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Multiple\\Remove'
+                    : 'mgr/ban/removeMultiple'
                 ,bans: cs
             }
             ,listeners: {
@@ -277,7 +287,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/ban/activate'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Activate'
+                    : 'mgr/ban/activate'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -293,7 +305,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/ban/activateMultiple'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Multiple\\Activate'
+                    : 'mgr/ban/activateMultiple'
                 ,bans: cs
             }
             ,listeners: {
@@ -309,7 +323,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/ban/deactivate'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Deactivate'
+                    : 'mgr/ban/deactivate'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -324,7 +340,9 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/ban/deactivateMultiple'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Ban\\Multiple\\Deactivate'
+                    : 'mgr/ban/deactivateMultiple'
                 ,bans: cs
             }
             ,listeners: {
@@ -404,7 +422,9 @@ Rampart.window.CreateBan = function(config) {
         ,height: 150
         ,width: 600
         ,url: Rampart.config.connectorUrl
-        ,action: 'mgr/ban/create'
+        ,action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\Ban\\Create'
+            : 'mgr/ban/create'
         ,fields: [{
             layout: 'column'
             ,border: false

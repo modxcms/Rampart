@@ -3,8 +3,12 @@ Rampart.grid.BanMatches = function(config) {
     config = config || {};
     Ext.applyIf(config,{
         url: Rampart.config.connector_url
-        ,baseParams: { action: 'mgr/matches/getList' }
-        ,save_action: 'mgr/matches/updateFromGrid'
+        ,baseParams: { action: Rampart.config.modx3 ?
+                'Rampart\\Processors\\Matches\\GetList'
+                : 'mgr/matches/getList' }
+        ,save_action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\Matches\\UpdateFromGrid'
+            : 'mgr/matches/updateFromGrid'
         ,fields: ['id','username','username_match','email','email_match','ip','ip_match','hostname','hostname_match','useragent','createdon','resource','pagetitle']
         ,paging: true
         ,autosave: true

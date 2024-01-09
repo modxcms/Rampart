@@ -4,8 +4,12 @@ Rampart.grid.WhiteLists = function(config) {
     this.sm = new Ext.grid.CheckboxSelectionModel();
     Ext.applyIf(config,{
         url: Rampart.config.connector_url
-        ,baseParams: { action: 'mgr/whitelist/getList' }
-        ,save_action: 'mgr/whitelist/updateFromGrid'
+        ,baseParams: { action: Rampart.config.modx3 ?
+                'Rampart\\Processors\\WhiteList\\GetList'
+                : 'mgr/whitelist/getList' }
+        ,save_action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\WhiteList\\UpdateFromGrid'
+            : 'mgr/whitelist/updateFromGrid'
         ,fields: ['id','ip','notes','active','createdon','createdby','editedon','editedby']
         ,paging: true
         ,autosave: true
@@ -159,7 +163,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
             ,text: _('rampart.whitelist_remove_confirm')
             ,url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/remove'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Remove'
+                    : 'mgr/whitelist/remove'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -176,7 +182,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
             ,text: _('rampart.whitelist_remove_selected_confirm')
             ,url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/removeMultiple'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Multiple\\Remove'
+                    : 'mgr/whitelist/removeMultiple'
                 ,whitelists: cs
             }
             ,listeners: {
@@ -193,7 +201,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/activate'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Activate'
+                    : 'mgr/whitelist/activate'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -206,7 +216,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/duplicate'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Duplicate'
+                    : 'mgr/whitelist/duplicate'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -222,7 +234,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/activateMultiple'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Multiple\\Activate'
+                    : 'mgr/whitelist/activateMultiple'
                 ,whitelists: cs
             }
             ,listeners: {
@@ -238,7 +252,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/deactivate'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Deactivate'
+                    : 'mgr/whitelist/deactivate'
                 ,id: this.menu.record.id
             }
             ,listeners: {
@@ -253,7 +269,9 @@ Ext.extend(Rampart.grid.WhiteLists,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/whitelist/deactivateMultiple'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\WhiteList\\Multiple\\Deactivate'
+                    : 'mgr/whitelist/deactivateMultiple'
                 ,whitelists: cs
             }
             ,listeners: {
@@ -333,7 +351,9 @@ Rampart.window.CreateWhiteList = function(config) {
         ,height: 150
         ,width: 500
         ,url: Rampart.config.connectorUrl
-        ,action: 'mgr/whitelist/create'
+        ,action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\WhiteList\\Create'
+            : 'mgr/whitelist/create'
         ,fields: [{
             fieldLabel: _('rampart.ip')
             ,description: MODx.expandHelp ? '' : _('rampart.whitelist_ip_desc')
@@ -393,7 +413,9 @@ Rampart.window.UpdateWhiteList = function(config) {
         ,height: 150
         ,width: 500
         ,url: Rampart.config.connectorUrl
-        ,action: 'mgr/whitelist/update'
+        ,action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\WhiteList\\Update'
+            : 'mgr/whitelist/update'
         ,fields: [{
             name: 'id'
             ,xtype: 'hidden'

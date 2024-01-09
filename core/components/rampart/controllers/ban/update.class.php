@@ -1,24 +1,34 @@
 <?php
+
+require_once dirname(__FILE__, 3) . '/index.class.php';
 /**
  * @package rampart
  * @subpackage controllers
  */
 
-class RampartBanUpdateManagerController extends RampartManagerController {
+class RampartBanUpdateManagerController extends RampartManagerController
+{
     /** @var rptBan $ban */
     public $ban;
 
-    public function process(array $scriptProperties = array()) {
-        $id = $this->modx->getOption('id',$_REQUEST,'');
-        if (empty($id)) return $this->failure($this->modx->lexicon('rampart.ban_err_ns'));
-        $this->ban = $this->modx->getObject('rptBan',$id);
+    public function process(array $scriptProperties = array())
+    {
+        $id = $this->modx->getOption('id', $_REQUEST, '');
+        if (empty($id)) {
+            return $this->failure($this->modx->lexicon('rampart.ban_err_ns'));
+        }
+        $this->ban = $this->modx->getObject('rptBan', $id);
         if (empty($this->ban)) {
-            return $this->failure($this->modx->lexicon('rampart.ban_err_nf',array('id' => $id)));
+            return $this->failure($this->modx->lexicon('rampart.ban_err_nf', array('id' => $id)));
         }
         return array();
     }
-    public function getPageTitle() { return $this->modx->lexicon('rampart'); }
-    public function loadCustomCssJs() {
+    public function getPageTitle()
+    {
+        return $this->modx->lexicon('rampart');
+    }
+    public function loadCustomCssJs()
+    {
         $banArray = $this->ban->toArray();
         $this->addJavascript($this->modx->getOption('manager_url').'assets/modext/util/datetime.js');
         $this->addJavascript($this->rampart->config['jsUrl'].'widgets/ban/ban.panel.js');
@@ -36,5 +46,8 @@ class RampartBanUpdateManagerController extends RampartManagerController {
         // ]]>
         </script>');
     }
-    public function getTemplateFile() { return $this->rampart->config['templatesPath'].'ban.tpl'; }
+    public function getTemplateFile()
+    {
+        return $this->rampart->config['templatesPath'].'ban.tpl';
+    }
 }

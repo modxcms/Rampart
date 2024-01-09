@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Rampart
  *
@@ -30,48 +31,35 @@
  * @var string $usernameField
  * @package rampart
  */
-$modelPath = $modx->getOption('rampart.core_path',null,$modx->getOption('core_path').'components/rampart/').'model/';
-$rampart = $modx->getService('rampart','Rampart',$modelPath.'rampart/');
 
-$username = $fields[$usernameField];
-$email = $fields['email'];
+$corePath = $modx->getOption(
+    'rampart.core_path',
+    null,
+    $modx->getOption('core_path', null, MODX_CORE_PATH) . 'components/rampart/'
+);
 
-$activationEmailTpl = $modx->getOption('activationEmailTpl',$scriptProperties,'');
-$activationEmailSubject = $modx->getOption('activationEmailSubject',$scriptProperties,'');
-$activationResourceId = $modx->getOption('activationResourceId',$scriptProperties,'');
-$rptSpammerErrorMessage = $modx->getOption('rptSpammerErrorMessage',$scriptProperties,'Your account has been banned as a spammer. Sorry.');
+require_once($corePath . 'vendor/autoload.php');
 
-$response = $rampart->check($username,$email);
-
-$hook->setValue('ip',$response[Rampart::IP]);
-$hook->setValue('hostname',$response[Rampart::HOSTNAME]);
-$hook->setValue('userAgent',$response[Rampart::USER_AGENT]);
-
-if ($response[Rampart::STATUS] == Rampart::STATUS_BANNED) {
-    $hook->addError('username',$rptSpammerErrorMessage);
-    return false;
-}
-if ($response[Rampart::STATUS] == Rampart::STATUS_MODERATED) {
-    /* prevents confirmation email from being sent */
-    $hook->setValue('register.moderate',true);
-
-    $password = $rampart->encrypt($fields['password']);
-
-    /* create a flagged user record */
-    /** @var rptFlaggedUser $flu */
-    $flu = $modx->newObject('rptFlaggedUser');
-    $flu->set('username',$response[Rampart::USERNAME]);
-    $flu->set('password',$password);
-    $flu->set('ip',$response[Rampart::IP]);
-    $flu->set('hostname',$response[Rampart::HOSTNAME]);
-    $flu->set('useragent',$response[Rampart::USER_AGENT]);
-    $flu->set('flaggedfor',$response[Rampart::REASON]);
-    $flu->set('activation_email_tpl',$activationEmailTpl);
-    $flu->set('activation_email_subject',$activationEmailSubject);
-    $flu->set('activation_resource_id',$activationResourceId);
-    $flu->set('flaggedon',time());
-    $flu->save();
-    return true;
+if (!isset($scriptProperties)) {
+    $scriptProperties = [];
 }
 
-return true;
+if (empty($modx->version)) {
+    $modx->getVersionData();
+}
+$scriptProperties['modx3'] = ($modx->version['version'] >= 3);
+if ($modx->version['version'] < 3) {
+    $rampart = $modx->getService(
+        'rampart',
+        'Rampart',
+        $corePath . 'model/rampart/',
+        [
+            'core_path' => $corePath
+        ]
+    );
+} else {
+    $rampart = new \Rampart\Rampart($modx);
+}
+
+$snippet = new \Rampart\Elements\Snippet\Register($rampart, $scriptProperties);
+return $snippet->run();
