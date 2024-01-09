@@ -4,7 +4,13 @@
  */
 $xpdo_meta_map['rptBanMatchField']= array (
   'package' => 'rampart',
+  'version' => '1.1',
   'table' => 'rampart_ban_matches_bans',
+  'extends' => 'xPDOObject',
+  'tableMeta' => 
+  array (
+    'engine' => 'InnoDB',
+  ),
   'fields' => 
   array (
     'ban' => 0,

@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(dirname(dirname(dirname(__FILE__)))) . '/vendor/autoload.php';
+require_once dirname(__FILE__, 3) . '/vendor/autoload.php';
 
 use Rampart\Rampart as RampartBase;
 use Rampart\v2\Controller\Request;

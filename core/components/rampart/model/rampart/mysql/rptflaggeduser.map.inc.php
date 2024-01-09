@@ -4,7 +4,13 @@
  */
 $xpdo_meta_map['rptFlaggedUser']= array (
   'package' => 'rampart',
+  'version' => '1.1',
   'table' => 'rampart_flagged_users',
+  'extends' => 'xPDOSimpleObject',
+  'tableMeta' => 
+  array (
+    'engine' => 'InnoDB',
+  ),
   'fields' => 
   array (
     'username' => '',
@@ -141,15 +147,15 @@ $xpdo_meta_map['rptFlaggedUser']= array (
         ),
       ),
     ),
-    'approved' => 
+    'status' => 
     array (
-      'alias' => 'approved',
+      'alias' => 'status',
       'primary' => false,
       'unique' => false,
       'type' => 'BTREE',
       'columns' => 
       array (
-        'approved' => 
+        'status' => 
         array (
           'length' => '',
           'collation' => 'A',
@@ -157,15 +163,15 @@ $xpdo_meta_map['rptFlaggedUser']= array (
         ),
       ),
     ),
-    'approvedby' => 
+    'actedby' => 
     array (
-      'alias' => 'approvedby',
+      'alias' => 'actedby',
       'primary' => false,
       'unique' => false,
       'type' => 'BTREE',
       'columns' => 
       array (
-        'approvedby' => 
+        'actedby' => 
         array (
           'length' => '',
           'collation' => 'A',

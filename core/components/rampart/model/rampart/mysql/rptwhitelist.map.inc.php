@@ -4,7 +4,13 @@
  */
 $xpdo_meta_map['rptWhiteList']= array (
   'package' => 'rampart',
+  'version' => '1.1',
   'table' => 'rampart_whitelist',
+  'extends' => 'xPDOSimpleObject',
+  'tableMeta' => 
+  array (
+    'engine' => 'InnoDB',
+  ),
   'fields' => 
   array (
     'ip' => NULL,

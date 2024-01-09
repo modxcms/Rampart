@@ -227,7 +227,7 @@ Ext.extend(Rampart.grid.Bans,MODx.grid.Grid,{
         this.addBanWindow.show(e.target);
     }
     ,updateBan: function(btn,e) {
-        location.href = '?a='+MODx.request.a+'&action=ban/update&id='+this.menu.record.id;
+        location.href = '?a=ban/update&namespace=rampart&id='+this.menu.record.id;
     }
     ,duplicateBan: function(btn,e) {
         MODx.Ajax.request({

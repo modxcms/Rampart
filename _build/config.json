@@ -5,12 +5,13 @@
   "version": "2.0.0",
   "author": "splittingred",
   "package": {
-    "menus": {
-      "rampart": {
+    "menus": [
+      {
+        "text": "rampart",
         "description": "rampart.menu_desc",
         "action": "home"
       }
-    },
+    ],
     "elements": {
       "plugins": [
         {
@@ -73,19 +74,19 @@
       {
         "key": "honeypot.enabled",
         "value": "0",
-        "xtype": "combo-boolean",
+        "type": "combo-boolean",
         "area": "HoneyPot"
       },
       {
         "key": "honeypot.fullwall_enabled",
         "value": "0",
-        "xtype": "combo-boolean",
+        "type": "combo-boolean",
         "area": "HoneyPot"
       },
       {
         "key": "denyaccess",
         "value": "0",
-        "xtype": "combo-boolean",
+        "type": "combo-boolean",
         "area": "Deny Access"
       },
       {
