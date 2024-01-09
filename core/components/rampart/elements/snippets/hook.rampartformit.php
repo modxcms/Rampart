@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Hook for FormIt forms
  *
@@ -9,26 +10,35 @@
  * @var array $fields
  * @package rampart
  */
-$modelPath = $modx->getOption('rampart.core_path',null,$modx->getOption('core_path').'components/rampart/').'model/';
-$rampart = $modx->getService('rampart','Rampart',$modelPath.'rampart/');
 
-/* setup default properties */
-$rptErrorField = $modx->getOption('rptErrorField',$scriptProperties,'email');
-$rptUsernameField = $modx->getOption('rptUsernameField',$scriptProperties,'username');
-$rptEmailField = $modx->getOption('rptEmailField',$scriptProperties,'email');
-$rptSpammerErrorMessage = $modx->getOption('rptSpammerErrorMessage',$scriptProperties,'Your account has been banned as a spammer. Sorry.');
+$corePath = $modx->getOption(
+    'rampart.core_path',
+    null,
+    $modx->getOption('core_path', null, MODX_CORE_PATH) . 'components/rampart/'
+);
 
-/* get username/email if they exist */
-$username = '';
-if (!empty($fields[$rptUsernameField])) { $username = $fields[$rptUsernameField]; }
-$email = '';
-if (!empty($fields[$rptEmailField])) { $email = $fields[$rptEmailField]; }
+require_once($corePath . 'vendor/autoload.php');
 
-/* run ban checking */
-$response = $rampart->check($username,$email);
-
-if ($response[Rampart::STATUS] == Rampart::STATUS_BANNED) {
-    $hook->addError($rptErrorField,$rptSpammerErrorMessage);
-    return false;
+if (!isset($scriptProperties)) {
+    $scriptProperties = [];
 }
-return true;
+
+if (empty($modx->version)) {
+    $modx->getVersionData();
+}
+$scriptProperties['modx3'] = ($modx->version['version'] >= 3);
+if ($modx->version['version'] < 3) {
+    $rampart = $modx->getService(
+        'rampart',
+        'Rampart',
+        $corePath . 'model/rampart/',
+        [
+            'core_path' => $corePath
+        ]
+    );
+} else {
+    $rampart = new \Rampart\Rampart($modx);
+}
+
+$snippet = new \Rampart\Elements\Snippet\FormIt($rampart, $scriptProperties);
+return $snippet->run();

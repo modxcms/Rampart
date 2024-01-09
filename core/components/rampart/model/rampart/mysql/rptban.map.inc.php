@@ -4,7 +4,13 @@
  */
 $xpdo_meta_map['rptBan']= array (
   'package' => 'rampart',
+  'version' => '1.1',
   'table' => 'rampart_bans',
+  'extends' => 'xPDOSimpleObject',
+  'tableMeta' => 
+  array (
+    'engine' => 'InnoDB',
+  ),
   'fields' => 
   array (
     'reason' => NULL,
@@ -213,22 +219,6 @@ $xpdo_meta_map['rptBan']= array (
   ),
   'indexes' => 
   array (
-    'bangroup' => 
-    array (
-      'alias' => 'bangroup',
-      'primary' => false,
-      'unique' => false,
-      'type' => 'BTREE',
-      'columns' => 
-      array (
-        'bangroup' => 
-        array (
-          'length' => '',
-          'collation' => 'A',
-          'null' => false,
-        ),
-      ),
-    ),
     'editedby' => 
     array (
       'alias' => 'editedby',
@@ -278,17 +268,6 @@ $xpdo_meta_map['rptBan']= array (
       ),
     ),
   ),
-  'aggregates' => 
-  array (
-    'EditedBy' => 
-    array (
-      'class' => 'modUser',
-      'local' => 'editedby',
-      'foreign' => 'id',
-      'cardinality' => 'one',
-      'owner' => 'foreign',
-    ),
-  ),
   'composites' => 
   array (
     'Matches' => 
@@ -306,6 +285,17 @@ $xpdo_meta_map['rptBan']= array (
       'foreign' => 'ban',
       'cardinality' => 'many',
       'owner' => 'local',
+    ),
+  ),
+  'aggregates' => 
+  array (
+    'EditedBy' => 
+    array (
+      'class' => 'modUser',
+      'local' => 'editedby',
+      'foreign' => 'id',
+      'cardinality' => 'one',
+      'owner' => 'foreign',
     ),
   ),
 );

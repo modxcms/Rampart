@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model package="rampart" baseClass="xPDOObject" platform="mysql" defaultEngine="MyISAM">
+<model package="rampart" baseClass="xPDOObject" platform="mysql" defaultEngine="InnoDB" version="1.1">
     <object class="rptBan" table="rampart_bans" extends="xPDOSimpleObject">
         <field key="reason" dbtype="tinytext" phptype="string" null="true" />
         <field key="ip" dbtype="varchar" precision="100" phptype="string" null="false" default="" />
@@ -25,9 +25,6 @@
         <field key="data" dbtype="mediumtext" phptype="json" />
         <field key="service" dbtype="varchar" precision="100" phptype="string" null="false" default="manual" />
 
-        <index alias="bangroup" name="bangroup" primary="false" unique="false" type="BTREE">
-            <column key="bangroup" length="" collation="A" null="false" />
-        </index>
         <index alias="editedby" name="editedby" primary="false" unique="false" type="BTREE">
             <column key="editedby" length="" collation="A" null="false" />
         </index>
@@ -62,11 +59,11 @@
         <index alias="username" name="username" primary="false" unique="false" type="BTREE">
             <column key="username" length="" collation="A" null="false" />
         </index>
-        <index alias="approved" name="approved" primary="false" unique="false" type="BTREE">
-            <column key="approved" length="" collation="A" null="false" />
+        <index alias="status" name="status" primary="false" unique="false" type="BTREE">
+            <column key="status" length="" collation="A" null="false" />
         </index>
-        <index alias="approvedby" name="approvedby" primary="false" unique="false" type="BTREE">
-            <column key="approvedby" length="" collation="A" null="false" />
+        <index alias="actedby" name="actedby" primary="false" unique="false" type="BTREE">
+            <column key="actedby" length="" collation="A" null="false" />
         </index>
         <index alias="activation_resource_id" name="activation_resource_id" primary="false" unique="false" type="BTREE">
             <column key="activation_resource_id" length="" collation="A" null="false" />

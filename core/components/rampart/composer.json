@@ -1,0 +1,19 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Rampart\\": "src/"
+        }
+    },
+    "config": {
+        "process-timeout": 0,
+        "sort-packages": true,
+        "platform": {
+            "php": "7.4"
+        }
+    },
+    "require-dev": {
+        "modx/revolution": "^3.0"
+    },
+    "require": {
+    }
+}

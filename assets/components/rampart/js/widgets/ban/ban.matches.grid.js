@@ -8,8 +8,12 @@ Rampart.grid.BanMatches = function(config) {
     });
     Ext.applyIf(config,{
         url: Rampart.config.connector_url
-        ,baseParams: { action: 'mgr/matches/getList', ban: MODx.request.id }
-        ,save_action: 'mgr/matches/updateFromGrid'
+        ,baseParams: { action: Rampart.config.modx3 ?
+                'Rampart\\Processors\\Matches\\GetList'
+                : 'mgr/matches/getList', ban: MODx.request.id }
+        ,save_action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\Matches\\UpdateFromGrid'
+            : 'mgr/matches/updateFromGrid'
         ,fields: ['id','reason','username','username_match','email','email_match','ip','ip_match','hostname','hostname_match','useragent','createdon','resource','pagetitle','data','data_formatted','notes','service']
         ,paging: true
         ,autosave: true

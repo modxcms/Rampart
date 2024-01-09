@@ -4,3 +4,5 @@ _build/build.config.php
 _build/build.properties.php
 .idea
 .nbproject
+vendor
+_packages

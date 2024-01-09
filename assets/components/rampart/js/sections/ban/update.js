@@ -3,7 +3,9 @@ Rampart.page.UpdateBan = function(config) {
 	Ext.applyIf(config,{
 	    formpanel: 'rampart-panel-ban'
         ,buttons: [{
-            process: 'mgr/ban/update'
+            process:  Rampart.config.modx3 ?
+                'Rampart\\Processors\\Ban\\Update'
+                : 'mgr/ban/update'
             ,text: _('save')
             ,method: 'remote'
             ,checkDirty: false
@@ -14,7 +16,7 @@ Rampart.page.UpdateBan = function(config) {
         },'-',{
             process: 'cancel'
             ,text: _('cancel')
-            ,params: {a:MODx.action['rampart:controllers/index']}
+            ,params: {a:'home', namespace:'rampart'}
         }]
         ,loadStay: false
         ,components: [{

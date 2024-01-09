@@ -4,9 +4,13 @@ Rampart.grid.ModeratedUsers = function(config) {
     this.sm = new Ext.grid.CheckboxSelectionModel();
     Ext.applyIf(config,{
         url: Rampart.config.connector_url
-        ,baseParams: { action: 'mgr/flagged/getList', status: '' }
+        ,baseParams: { action: Rampart.config.modx3 ?
+                'Rampart\\Processors\\Flagged\\GetList'
+                : 'mgr/flagged/getList', status: '' }
         ,id: 'rpt-grid-moderated-users'
-        ,save_action: 'mgr/flagged/updateFromGrid'
+        ,save_action: Rampart.config.modx3 ?
+            'Rampart\\Processors\\Flagged\\UpdateFromGrid'
+            : 'mgr/flagged/updateFromGrid'
         ,fields: ['id','username','fullname','email','ip','hostname','useragent','flaggedfor','flaggedon']
         ,paging: true
         ,autosave: false
@@ -195,7 +199,9 @@ Ext.extend(Rampart.grid.ModeratedUsers,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/flagged/approve'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Flagged\\Approve'
+                    : 'mgr/flagged/approve'
                 ,users: cs
             }
             ,listeners: {
@@ -214,7 +220,9 @@ Ext.extend(Rampart.grid.ModeratedUsers,MODx.grid.Grid,{
         MODx.Ajax.request({
             url: this.config.url
             ,params: {
-                action: 'mgr/flagged/reject'
+                action: Rampart.config.modx3 ?
+                    'Rampart\\Processors\\Flagged\\Reject'
+                    : 'mgr/flagged/reject'
                 ,users: cs
             }
             ,listeners: {

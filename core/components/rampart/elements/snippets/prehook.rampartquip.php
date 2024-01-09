@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Rampart
  *
@@ -29,22 +30,35 @@
  * @var array $fields
  * @package rampart
  */
-$modelPath = $modx->getOption('rampart.core_path',null,$modx->getOption('core_path').'components/rampart/').'model/';
-$rampart = $modx->getService('rampart','Rampart',$modelPath.'rampart/');
 
-$email = $fields['email'];
+$corePath = $modx->getOption(
+    'rampart.core_path',
+    null,
+    $modx->getOption('core_path', null, MODX_CORE_PATH) . 'components/rampart/'
+);
 
-$rptSpammerErrorMessage = $modx->getOption('rptSpammerErrorMessage',$scriptProperties,'Your account has been banned as a spammer. Sorry.');
+require_once($corePath . 'vendor/autoload.php');
 
-$response = $rampart->check('',$email);
-
-$hook->setValue('ip',$response[Rampart::IP]);
-$hook->setValue('hostname',$response[Rampart::HOSTNAME]);
-$hook->setValue('userAgent',$response[Rampart::USER_AGENT]);
-
-if ($response[Rampart::STATUS] == Rampart::STATUS_BANNED) {
-    $hook->addError('email',$rptSpammerErrorMessage);
-    return false;
+if (!isset($scriptProperties)) {
+    $scriptProperties = [];
 }
 
-return true;
+if (empty($modx->version)) {
+    $modx->getVersionData();
+}
+$scriptProperties['modx3'] = ($modx->version['version'] >= 3);
+if ($modx->version['version'] < 3) {
+    $rampart = $modx->getService(
+        'rampart',
+        'Rampart',
+        $corePath . 'model/rampart/',
+        [
+            'core_path' => $corePath
+        ]
+    );
+} else {
+    $rampart = new \Rampart\Rampart($modx);
+}
+
+$snippet = new \Rampart\Elements\Snippet\Quip($rampart, $scriptProperties);
+return $snippet->run();
