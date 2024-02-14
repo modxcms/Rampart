@@ -1,12 +1,11 @@
 <?php
 
-namespace Rampart;
-
-use MODX\Revolution\Rest\modRest;
+namespace Rampart\v2;
 
 class StopForumSpam
 {
     public $response = null;
+    public $responseXml = null;
     public $modx = null;
     public function __construct(&$modx, array $config = array())
     {
@@ -44,15 +43,12 @@ class StopForumSpam
             $params['username'] = $username;
         }
 
-        $response = $this->request($params);
-        if (empty($response)) {
-            return array();
-        }
+        $xml = $this->request($params);
         $i = 0;
         $errors = array();
-        foreach ($response['appears'] as $result) {
+        foreach ($xml->appears as $result) {
             if ($result == 'yes') {
-                $errors[] = ucfirst($response['type'][$i]);
+                $errors[] = ucfirst($xml->type[$i]);
             }
             $i++;
         }
@@ -68,26 +64,36 @@ class StopForumSpam
      */
     public function request(array $params = array())
     {
-        $this->getClient();
+        $loaded = $this->_getClient();
+        if (!$loaded) {
+            $this->modx->log(\modX::LOG_LEVEL_ERROR, '[StopForumSpam] Could not load REST client.');
+            return true;
+        }
 
         $this->response = $this->modx->rest->request(
+            $this->config['host'],
+            $this->config['path'],
             $this->config['method'],
-            $this->config['host'] . $this->config['path'],
             $params
         );
-        return $this->response->process();
+        $this->responseXml = $this->response->toXml();
+        return $this->responseXml;
     }
 
     /**
      * Get the REST Client
      *
      * @access private
-     * @return modRest
+     * @return modRestClient/boolean
      */
-    private function getClient(): modRest
+    private function _getClient()
     {
         if (empty($this->modx->rest)) {
-            $this->modx->rest = new modRest($this->modx);
+            $this->modx->getService('rest', 'rest.modRestClient');
+            $loaded = $this->modx->rest->getConnection();
+            if (!$loaded) {
+                return false;
+            }
         }
         return $this->modx->rest;
     }

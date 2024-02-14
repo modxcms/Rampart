@@ -2,9 +2,12 @@
 
 namespace Rampart\Processors\Ban;
 
-class Duplicate extends \MODX\Revolution\Processors\ModelProcessor
+use MODX\Revolution\Processors\ModelProcessor;
+use Rampart\Model\Ban;
+
+class Duplicate extends ModelProcessor
 {
-    public $classKey = \Rampart\Model\Ban::class;
+    public $classKey = Ban::class;
     public $objectType = 'rampart.ban';
     public $languageTopics = array('rampart:default');
 
@@ -23,7 +26,7 @@ class Duplicate extends \MODX\Revolution\Processors\ModelProcessor
 
     public function process()
     {
-        /** @var rptBan $newBan */
+        /** @var Ban $newBan */
         $newBan = $this->modx->newObject($this->classKey);
         $newBan->fromArray($this->object->toArray());
         $newBan->set('editedon', null);
