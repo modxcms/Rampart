@@ -2,9 +2,12 @@
 
 namespace Rampart\Processors\WhiteList;
 
-class Duplicate extends \MODX\Revolution\Processors\ModelProcessor
+use MODX\Revolution\Processors\ModelProcessor;
+use Rampart\Model\WhiteList;
+
+class Duplicate extends ModelProcessor
 {
-    public $classKey = \Rampart\Model\WhiteList::class;
+    public $classKey = WhiteList::class;
     public $objectType = 'rampart.whitelist';
     public $languageTopics = array('rampart:default');
 
@@ -23,7 +26,7 @@ class Duplicate extends \MODX\Revolution\Processors\ModelProcessor
 
     public function process()
     {
-        /** @var rptWhiteList $newWhiteList */
+        /** @var WhiteList $newWhiteList */
         $newWhiteList = $this->modx->newObject($this->classKey);
         $newWhiteList->fromArray($this->object->toArray());
         $newWhiteList->set('editedon', null);

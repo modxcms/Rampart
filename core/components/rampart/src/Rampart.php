@@ -3,6 +3,10 @@
 namespace Rampart;
 
 use Rampart\Controller\Request;
+use Rampart\Model\Ban;
+use Rampart\Model\BanMatch;
+use Rampart\Model\BanMatchField;
+use Rampart\Model\WhiteList;
 
 class Rampart
 {
@@ -36,8 +40,16 @@ class Rampart
     {
         $this->modx =& $modx;
 
-        $corePath = $this->modx->getOption('rampart.core_path', $config, $this->modx->getOption('core_path').'components/rampart/');
-        $assetsUrl = $this->modx->getOption('rampart.assets_url', $config, $this->modx->getOption('assets_url').'components/rampart/');
+        $corePath = $this->modx->getOption(
+            'rampart.core_path',
+            $config,
+            $this->modx->getOption('core_path').'components/rampart/'
+        );
+        $assetsUrl = $this->modx->getOption(
+            'rampart.assets_url',
+            $config,
+            $this->modx->getOption('assets_url').'components/rampart/'
+        );
         $connectorUrl = $assetsUrl.'connector.php';
 
         $this->config = array_merge(array(
@@ -144,8 +156,8 @@ class Rampart
         $boomIp = explode('.', $result[Rampart::IP]);
 
         /* build spam checking query */
-        $c = $this->modx->newQuery('rptBan');
-        $c->select($this->modx->getSelectColumns('rptBan', 'rptBan'));
+        $c = $this->modx->newQuery(Ban::class);
+        $c->select($this->modx->getSelectColumns(Ban::class, 'rptBan'));
         $c->select(array(
             'IF("'.$result[Rampart::USERNAME].'" LIKE `rptBan`.`username`,1,0) AS `username_match`',
             'IF("'.$result[Rampart::EMAIL].'" LIKE `rptBan`.`email`,1,0) AS `email_match`',
@@ -212,56 +224,52 @@ class Rampart
     public function runStopForumSpamChecks(array $result)
     {
         /* Run StopForumSpam checks */
-        if ($this->modx->loadClass('stopforumspam.RampartStopForumSpam', $this->config['modelPath'], true, true)) {
-            $sfspam = new StopForumSpam($this->modx);
-            $spamResult = $sfspam->check($result[Rampart::IP], $result[Rampart::EMAIL], $result[Rampart::USERNAME]);
-            if (!empty($spamResult)) {
-                if (in_array('Ip', $spamResult) && in_array('Username', $spamResult)) {
+        $sfspam = new StopForumSpam($this->modx);
+        $spamResult = $sfspam->check($result[Rampart::IP], $result[Rampart::EMAIL], $result[Rampart::USERNAME]);
+        if (!empty($spamResult)) {
+            if (in_array('Ip', $spamResult) && in_array('Username', $spamResult)) {
+                /**
+                 * If ip AND username match, moderate user
+                 */
+                $result[Rampart::STATUS] = Rampart::STATUS_MODERATED;
+                $result[Rampart::REASON] = 'ipusername';
+            } elseif (in_array('Email', $spamResult)) {
+                /**
+                 * Moderate users who match the email
+                 */
+                $result[Rampart::STATUS] = Rampart::STATUS_MODERATED;
+                $result[Rampart::REASON] = 'email';
+            } elseif (in_array('Ip', $spamResult)) {
+                $threshold = $this->modx->getOption(
+                    'rampart.sfs_ipban_threshold',
+                    null,
+                    25
+                ); /* threshold of reported times by SFS */
+                $expiration = $this->modx->getOption(
+                    'rampart.sfs_ipban_expiration',
+                    null,
+                    30
+                ); /* # of days to ban */
+                if ($threshold > 0) {
                     /**
-                     * If ip AND username match, moderate user
+                     * If the IP of the spammer shows up past our threshold
+                     * of frequency times that StopForumSpam reports as,
+                     * add a single-ip ban for a certain amount of time
                      */
-                    $result[Rampart::STATUS] = Rampart::STATUS_MODERATED;
-                    $result[Rampart::REASON] = 'ipusername';
-                } elseif (in_array('Email', $spamResult)) {
-                    /**
-                     * Moderate users who match the email
-                     */
-                    $result[Rampart::STATUS] = Rampart::STATUS_MODERATED;
-                    $result[Rampart::REASON] = 'email';
-                } elseif (in_array('Ip', $spamResult)) {
-                    $threshold = $this->modx->getOption(
-                        'rampart.sfs_ipban_threshold',
-                        null,
-                        25
-                    ); /* threshold of reported times by SFS */
-                    $expiration = $this->modx->getOption(
-                        'rampart.sfs_ipban_expiration',
-                        null,
-                        30
-                    ); /* # of days to ban */
-                    if ($threshold > 0) {
-                        /**
-                         * If the IP of the spammer shows up past our threshold
-                         * of frequency times that StopForumSpam reports as,
-                         * add a single-ip ban for a certain amount of time
-                         */
-                        $ipResult = $sfspam->check($result[Rampart::IP]);
-                        if (!empty($ipResult)) {
-                            $ips = $sfspam->responseXml;
-                            $frequency = (int)$ips->frequency;
-                            if ($frequency >= $threshold) {
-                                $result[Rampart::STATUS] = Rampart::STATUS_BANNED;
-                                $result[Rampart::REASON] = 'sfsip';
-                                $result[Rampart::DESCRIPTION] = 'StopForumSpam IP Ban';
-                                $result[Rampart::EXPIRATION] = $expiration;
-                                $result[Rampart::SERVICE] = 'stopforumspam';
-                            }
+                    $ipResult = $sfspam->check($result[Rampart::IP]);
+                    if (!empty($ipResult)) {
+                        $ips = $sfspam->responseXml;
+                        $frequency = (int)$ips->frequency;
+                        if ($frequency >= $threshold) {
+                            $result[Rampart::STATUS] = Rampart::STATUS_BANNED;
+                            $result[Rampart::REASON] = 'sfsip';
+                            $result[Rampart::DESCRIPTION] = 'StopForumSpam IP Ban';
+                            $result[Rampart::EXPIRATION] = $expiration;
+                            $result[Rampart::SERVICE] = 'stopforumspam';
                         }
                     }
                 }
             }
-        } else {
-            $this->modx->log(\modX::LOG_LEVEL_ERROR, '[Rampart] Could not load StopForumSpam class.');
         }
         return $result;
     }
@@ -274,13 +282,6 @@ class Rampart
     public function runProjectHoneyPotChecks(array $result) : array
     {
         if (empty($this->honey)) {
-            if (!$this->modx->loadClass('projecthoneypot.RampartHoneyPot', $this->config['modelPath'], true, true)) {
-                $this->modx->log(
-                    \modX::LOG_LEVEL_ERROR,
-                    '[Rampart] Could not load RampartHoneyPot class from: '.$this->config['modelPath']
-                );
-                return $result;
-            }
             $this->honey = new HoneyPot($this);
         }
         if (!$this->honey->check()) {
@@ -307,12 +308,12 @@ class Rampart
      */
     public function checkWhiteList(array $result = array()) : bool
     {
-        $c = $this->modx->newQuery('rptWhiteList');
+        $c = $this->modx->newQuery(WhiteList::class);
         $c->where(array(
             'ip' => $result[Rampart::IP],
             'active' => true,
         ));
-        $count = $this->modx->getCount('rptWhiteList', $c);
+        $count = $this->modx->getCount(WhiteList::class, $c);
         return $count > 0;
     }
 
@@ -352,17 +353,17 @@ class Rampart
 
         /* if specifying an existing ban */
         if (!empty($result[Rampart::BAN])) {
-            $ban = $this->modx->getObject('rptBan', $result[Rampart::BAN]);
+            $ban = $this->modx->getObject(Ban::class, $result[Rampart::BAN]);
         }
         /* otherwise we'll try and grab it from the IP */
         if (empty($ban)) {
-            $ban = $this->modx->getObject('rptBan', array(
+            $ban = $this->modx->getObject(Ban::class, array(
                 'ip' => $result[Rampart::IP],
             ));
         }
         /* and finally, if no matches, create a new ban */
         if (empty($ban)) {
-            $ban = $this->modx->newObject('rptBan');
+            $ban = $this->modx->newObject(Ban::class);
             $ban->set('createdon', time());
             $ban->set('active', true);
             $boomIp = explode('.', $result[Rampart::IP]);
@@ -393,7 +394,7 @@ class Rampart
         $ban->set('service', !empty($result[Rampart::SERVICE]) ? $result[Rampart::SERVICE] : 'manual');
         if ($ban->save()) {
             /* now create match record */
-            $match = $this->modx->newObject('rptBanMatch');
+            $match = $this->modx->newObject(BanMatch::class);
             $match->set('ban', $ban->get('id'));
             $match->set('ip', $result[Rampart::IP]);
             $match->set('hostname', !empty($result[Rampart::HOSTNAME]) ? $result[Rampart::HOSTNAME] : '');
@@ -433,7 +434,7 @@ class Rampart
             if ($match->save()) {
                 /* if any field matches, store here */
                 foreach ($fields as $field => $value) {
-                    $bmf = $this->modx->newObject('rptBanMatchField');
+                    $bmf = $this->modx->newObject(BanMatchField::class);
                     $bmf->set('ban', $ban->get('id'));
                     $bmf->set('ban_match', $match->get('id'));
                     $bmf->set('field', $field);
