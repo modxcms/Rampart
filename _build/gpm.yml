@@ -2,7 +2,7 @@ name: Rampart
 namespace: Rampart
 lowCaseName: rampart
 description: Rampart is a robust anti-spam tool for MODX Revolution.
-version: 2.0.1
+version: 2.0.2
 author: splittingred
 menus:
   - text: rampart

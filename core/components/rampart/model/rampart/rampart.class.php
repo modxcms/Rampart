@@ -163,14 +163,7 @@ class Rampart extends RampartBase
     public function runProjectHoneyPotChecks(array $result) : array
     {
         if (empty($this->honey)) {
-            if (!$this->modx->loadClass('projecthoneypot.RampartHoneyPot', $this->config['modelPath'], true, true)) {
-                $this->modx->log(
-                    \modX::LOG_LEVEL_ERROR,
-                    '[Rampart] Could not load RampartHoneyPot class from: '.$this->config['modelPath']
-                );
-                return $result;
-            }
-            $this->honey = new HoneyPot($this);
+            $this->honey = new \Rampart\HoneyPot($this);
         }
         if (!$this->honey->check()) {
             $result['response'] = $this->honey->values;
