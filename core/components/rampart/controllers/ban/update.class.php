@@ -17,7 +17,14 @@ class RampartBanUpdateManagerController extends RampartManagerController
         if (empty($id)) {
             return $this->failure($this->modx->lexicon('rampart.ban_err_ns'));
         }
-        $this->ban = $this->modx->getObject('rptBan', $id);
+        if (empty($this->modx->version)) {
+            $this->modx->getVersionData();
+        }
+        if ($this->modx->version['version'] < 3) {
+            $this->ban = $this->modx->getObject('rptBan', $id);
+        } else {
+            $this->ban = $this->modx->getObject(\Rampart\Model\Ban::class, $id);
+        }
         if (empty($this->ban)) {
             return $this->failure($this->modx->lexicon('rampart.ban_err_nf', array('id' => $id)));
         }

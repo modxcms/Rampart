@@ -1,5 +1,9 @@
 Changelog for Rampart.
 
+Rampart 2.0.3
+==============
+- Fix broken ban update page on MODX 3
+
 Rampart 2.0.2
 ==============
 - Remove old MODX 2.x code

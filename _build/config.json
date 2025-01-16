@@ -2,7 +2,7 @@
   "name": "Rampart",
   "lowCaseName": "rampart",
   "description": "Rampart is a robust anti-spam tool for MODX Revolution.",
-  "version": "2.0.2-pl",
+  "version": "2.0.3-pl",
   "author": "splittingred",
   "package": {
     "menus": [
