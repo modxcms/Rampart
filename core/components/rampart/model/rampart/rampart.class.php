@@ -225,6 +225,8 @@ class Rampart extends RampartBase
             ));
         }
         /* and finally, if no matches, create a new ban */
+        $now = time();
+        $future = $now + ($result[RampartBase::EXPIRATION] * 24 * 60 * 60);
         if (empty($ban)) {
             $ban = $this->modx->newObject('rptBan');
             $ban->set('createdon', time());
@@ -238,12 +240,15 @@ class Rampart extends RampartBase
             $ban->set('ip_high3', $boomIp[2]);
             $ban->set('ip_low4', $boomIp[3]);
             $ban->set('ip_high4', $boomIp[3]);
-            $ban->set('matches', 1);
-            $future = time() + ($result[RampartBase::EXPIRATION] * 24 * 60 * 60);
             $ban->set('expireson', $future);
+            $ban->set('matches', 1);
         } else {
             $matches = (int)$ban->get('matches') + 1;
             $ban->set('matches', $matches);
+        }
+
+        if ($ban->get('expireson') < $now) {
+            $ban->set('expireson', $now);
         }
 
         /* now update IP, last active, store latest data, etc */
