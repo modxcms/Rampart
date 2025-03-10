@@ -153,7 +153,8 @@ class Rampart
      */
     public function checkBanList($result)
     {
-        $boomIp = explode('.', $result[Rampart::IP]);
+        // test if IPv4 or IPv6
+        $ipv4 = !(strpos($result[Rampart::IP], ':') !== false);
 
         /* build spam checking query */
         $c = $this->modx->newQuery(Ban::class);
@@ -162,11 +163,29 @@ class Rampart
             'IF("'.$result[Rampart::USERNAME].'" LIKE `rptBan`.`username`,1,0) AS `username_match`',
             'IF("'.$result[Rampart::EMAIL].'" LIKE `rptBan`.`email`,1,0) AS `email_match`',
             'IF("'.$result[Rampart::HOSTNAME].'" LIKE `rptBan`.`hostname`,1,0) AS `hostname_match`',
-            'IF((('.$boomIp[0].' BETWEEN `rptBan`.`ip_low1` AND `rptBan`.`ip_high1`)
-             AND ('.$boomIp[1].' BETWEEN `rptBan`.`ip_low2` AND `rptBan`.`ip_high2`)
-             AND ('.$boomIp[2].' BETWEEN `rptBan`.`ip_low3` AND `rptBan`.`ip_high3`)
-             AND ('.$boomIp[3].' BETWEEN `rptBan`.`ip_low4` AND `rptBan`.`ip_high4`)),1,0) AS `ip_match`',
         ));
+        if ($ipv4) {
+            $boomIp = explode('.', $result[Rampart::IP]);
+            $c->select(array(
+                'IF((('.$boomIp[0].' BETWEEN `rptBan`.`ip_low1` AND `rptBan`.`ip_high1`)
+                 AND ('.$boomIp[1].' BETWEEN `rptBan`.`ip_low2` AND `rptBan`.`ip_high2`)
+                 AND ('.$boomIp[2].' BETWEEN `rptBan`.`ip_low3` AND `rptBan`.`ip_high3`)
+                 AND ('.$boomIp[3].' BETWEEN `rptBan`.`ip_low4` AND `rptBan`.`ip_high4`)),1,0) AS `ip_match`',
+            ));
+            $c->orCondition(array(
+                '(('.$boomIp[0].' BETWEEN `rptBan`.`ip_low1` AND `rptBan`.`ip_high1`)
+            AND ('.$boomIp[1].' BETWEEN `rptBan`.`ip_low2` AND `rptBan`.`ip_high2`)
+            AND ('.$boomIp[2].' BETWEEN `rptBan`.`ip_low3` AND `rptBan`.`ip_high3`)
+            AND ('.$boomIp[3].' BETWEEN `rptBan`.`ip_low4` AND `rptBan`.`ip_high4`))'
+            ), null, 2);
+        } else {
+            $c->select(array(
+                'IF((`rptBan`.`ip` = "'.$result[Rampart::IP].'"),1,0) as `ip_match`',
+            ));
+            $c->orCondition(array(
+                '`rptBan`.`ip` = "'.$result[Rampart::IP].'"'
+            ), null, 2);
+        }
         if (!empty($result[Rampart::USERNAME])) {
             $c->orCondition(array(
                 '"'.$result[Rampart::USERNAME].'" LIKE rptBan.username',
@@ -179,12 +198,6 @@ class Rampart
         }
         $c->orCondition(array(
             '"'.$result[Rampart::HOSTNAME].'" LIKE rptBan.hostname',
-        ), null, 2);
-        $c->orCondition(array(
-            '(('.$boomIp[0].' BETWEEN `rptBan`.`ip_low1` AND `rptBan`.`ip_high1`)
-            AND ('.$boomIp[1].' BETWEEN `rptBan`.`ip_low2` AND `rptBan`.`ip_high2`)
-            AND ('.$boomIp[2].' BETWEEN `rptBan`.`ip_low3` AND `rptBan`.`ip_high3`)
-            AND ('.$boomIp[3].' BETWEEN `rptBan`.`ip_low4` AND `rptBan`.`ip_high4`))'
         ), null, 2);
         $c->where(array(
             'active' => true,
@@ -368,15 +381,18 @@ class Rampart
             $ban = $this->modx->newObject(Ban::class);
             $ban->set('createdon', time());
             $ban->set('active', true);
-            $boomIp = explode('.', $result[Rampart::IP]);
-            $ban->set('ip_low1', $boomIp[0]);
-            $ban->set('ip_high1', $boomIp[0]);
-            $ban->set('ip_low2', $boomIp[1]);
-            $ban->set('ip_high2', $boomIp[1]);
-            $ban->set('ip_low3', $boomIp[2]);
-            $ban->set('ip_high3', $boomIp[2]);
-            $ban->set('ip_low4', $boomIp[3]);
-            $ban->set('ip_high4', $boomIp[3]);
+            $ipv4 = !(strpos($result[Rampart::IP], ':') !== false);
+            if ($ipv4) {
+                $boomIp = explode('.', $result[Rampart::IP]);
+                $ban->set('ip_low1', $boomIp[0]);
+                $ban->set('ip_high1', $boomIp[0]);
+                $ban->set('ip_low2', $boomIp[1]);
+                $ban->set('ip_high2', $boomIp[1]);
+                $ban->set('ip_low3', $boomIp[2]);
+                $ban->set('ip_high3', $boomIp[2]);
+                $ban->set('ip_low4', $boomIp[3]);
+                $ban->set('ip_high4', $boomIp[3]);
+            }
             $ban->set('expireson', $future);
             $ban->set('matches', 1);
         } else {
