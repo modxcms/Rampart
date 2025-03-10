@@ -1,5 +1,9 @@
 Changelog for Rampart.
 
+Rampart 2.0.4
+==============
+- Add fix for IPv6 Addresses
+
 Rampart 2.0.3
 ==============
 - Fix broken ban update page on MODX 3
